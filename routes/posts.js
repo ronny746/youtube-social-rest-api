@@ -5,6 +5,28 @@ const User = require("../models/User");
 
 
 
+const secret_key = "Rana";
+
+
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+
+  if (!token) {
+    return res.status(401).json('Access denied. No token provided');
+  }
+  const user = token.split(" ");
+  const xx = user[1];
+  try {
+    const decoded = jwt.verify(xx, secret_key); // Replace 'secret_key' with your own secret key
+
+    // Attach the decoded user information to the request object
+    req.user = decoded;
+
+    next(); // Call the next middleware or route handler
+  } catch (err) {
+    res.status(401).json('Invalid token');
+  }
+};
 
 // Set up Multer storage for file upload
 const storage = multer.diskStorage({
@@ -96,9 +118,9 @@ router.get("/:id", async (req, res) => {
 
 //get timeline posts
 
-router.get("/timeline/all", async (req, res) => {
+router.get("/timeline/all",verifyToken, async (req, res) => {
   try {
-    const currentUser = await User.findById(req.body.userId);
+    const currentUser = await User.findById(req.user.userId);
     const userPosts = await Post.find({ userId: currentUser._id });
     const friendPosts = await Promise.all(
       currentUser.followings.map((friendId) => {
