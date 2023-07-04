@@ -2,6 +2,7 @@ const User = require("../models/User");
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const Chat = require('../models/Chat');
 const secret_key = "Rana";
 
 
@@ -24,6 +25,20 @@ const verifyToken = (req, res, next) => {
     res.status(401).json('Invalid token');
   }
 };
+
+
+
+// Get all users
+router.get('/alluser', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Error retrieving users' });
+  }
+});
+
+module.exports = router;
 
 //update user
 router.put("/:id", async (req, res) => {
@@ -86,15 +101,27 @@ router.get('/profile', verifyToken, async (req, res) => {
 
     // Retrieve user profile based on the userId
     const user = await User.findById(userId);
-     if (!user) {
-      res.status(404).json("user not found");
-     }else{
-    res.status(200).json(user);
-     }
+    if (!user) {
+      res.status(404).json("User not found");
+    } else {
+      // Count the number of followers and followings
+      const followersCount = user.followers.length;
+      const followingsCount = user.followings.length;
+
+      // Update the user object with the counts
+      const userProfile = {
+        ...user.toObject(),
+        followersCount,
+        followingsCount
+      };
+
+      res.status(200).json(userProfile);
+    }
   } catch (err) {
     res.status(500).json(err);
   }
 });
+
 
 
 //follow a user
@@ -158,7 +185,45 @@ router.put("/:id/unfollow", async (req, res) => {
 
   });
   
+  router.post("/send-message",verifyToken, async (req, res) => {
+    try {
+      
+      let userId = req.user.userId;
+      
+      const {receiver,message } = req.body;
 
+      const chat = new Chat({
+        sender: userId,
+        receiver: receiver,
+        message: message
+      });
+      await chat.save();
+      res.status(200).json({data:chat});
+    } catch (err) {
+      res.status(500).json(err);
+    }
+
+  });
   
+  router.get("/get-userchat/:senderid/:reciverid", async (req, res) => {
+    try {
+      const userId = req.params.senderid;
+      const receiverId = req.params.reciverid;
+  
+      const userChat = await Chat.find({
+        $or: [
+          { sender: userId, receiver: receiverId },
+          { sender: receiverId, receiver: userId },
+        ],
+      }).populate("users").populate("receiver", "username email profilePicture");;
+  
+      res.status(200).json({ data: userChat });
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  });
+  
+
+// Create chat
 
 module.exports = router;
