@@ -44,7 +44,7 @@ const upload = multer({ storage });
 
 router.post("/", upload.single('img'), async (req, res) => {
 
-  const baseURL = 'localhost:8800/';
+  const baseURL = 'https://youtube-social-rest-api-i4hw.vercel.app/';
   const newimage = baseURL+req.file.path;
   const newPost = new Post({
     userId: req.body.userId,
