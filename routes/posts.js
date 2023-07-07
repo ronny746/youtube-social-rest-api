@@ -2,9 +2,7 @@ const router = require("express").Router();
 const Post = require("../models/Post");
 const multer = require('multer');
 const User = require("../models/User");
-
-
-
+const jwt = require('jsonwebtoken');
 const secret_key = "Rana";
 
 
