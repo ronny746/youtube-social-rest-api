@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 const secret_key = "Rana";
 const cloudinary = require("cloudinary").v2;
 const util = require("util");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+ // Import Multer for handling multipart/form-data
+
 
 
 
@@ -15,7 +18,13 @@ cloudinary.config({
   api_secret: 'JtY42piPH7fDM5ue2eQxtIRKQ50'
 });
 
-
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "Posts",
+  },
+});
+const upload = multer({ storage: storage });
 // Convert the callback-based method to a promise-based method
 const uploadAsync = util.promisify(cloudinary.uploader.upload);
 const verifyToken = (req, res, next) => {
@@ -38,35 +47,23 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// Set up Multer storage for file upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './uploads/'); // Destination folder for storing uploaded files
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname); // Use the original filename
-  }
-});
 
-// Create a Multer upload middleware
-const upload = multer({ storage });
 //create a post
 
-router.post("/", upload.single('img'), async (req, res) => {
-
-
+router.post("/", upload.single("img"), async (req, res) => {
   try {
-    const result = await uploadAsync(req.file.path);
+    // const result = await cloudinary.uploader.upload(req.file.buffer, {
+    //   folder: "posts", // Specify the folder in Cloudinary where the uploaded file will be stored
+    // });
     const newPost = new Post({
       userId: req.body.userId,
       desc: req.body.desc,
-      img: result.secure_url
+      img: req.file.path, // Save the secure URL of the uploaded image from Cloudinary
     });
 
     const savedPost = await newPost.save();
     res.status(200).json(savedPost);
-  }
-  catch (err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 });
