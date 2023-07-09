@@ -203,6 +203,22 @@ router.put("/:id/unfollow", async (req, res) => {
   });
   
   
-// Create chat
+  router.get("/not-followers-following", verifyToken, async (req, res) => {
+    try {
+      const currentUser = await User.findById(req.user.userId);
+      const currentFollowers = currentUser.followers;
+      const currentFollowing = currentUser.followings;
+  
+      // Find all users who are not in the current user's followers or followings array
+      const usersNotFollowedOrFollowing = await User.find({
+        _id: { $nin: [...currentFollowers, ...currentFollowing] },
+      });
+  
+      res.status(200).json(usersNotFollowedOrFollowing);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to retrieve users" });
+    }
+  });
+  
 
 module.exports = router;
