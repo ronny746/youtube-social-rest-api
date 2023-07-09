@@ -221,11 +221,12 @@ router.get("/timeline/all", verifyToken, async (req, res) => {
     );
 
     // Combine userPosts and friendPosts into a single array
-    const allPosts = userPosts.concat(...friendPosts);
-
-
+    let allPosts = userPosts.concat(...friendPosts);
+    // Sort the allPosts array based on createdAt in descending order
+    allPosts.sort((a, b) => b.createdAt - a.createdAt);
 
     res.json(allPosts);
+
   } catch (err) {
     res.status(500).json(err);
   }
