@@ -9,10 +9,10 @@ const util = require("util");
 
 
 
-cloudinary.config({ 
-  cloud_name: 'dvop5hsdw', 
-  api_key: '432668353397378', 
-  api_secret: 'JtY42piPH7fDM5ue2eQxtIRKQ50' 
+cloudinary.config({
+  cloud_name: 'dvop5hsdw',
+  api_key: '432668353397378',
+  api_secret: 'JtY42piPH7fDM5ue2eQxtIRKQ50'
 });
 
 
@@ -54,7 +54,7 @@ const upload = multer({ storage });
 
 router.post("/", upload.single('img'), async (req, res) => {
 
-  
+
   try {
     const result = await uploadAsync(req.file.path);
     const newPost = new Post({
@@ -62,7 +62,7 @@ router.post("/", upload.single('img'), async (req, res) => {
       desc: req.body.desc,
       img: result.secure_url
     });
-  
+
     const savedPost = await newPost.save();
     res.status(200).json(savedPost);
   }
@@ -118,14 +118,14 @@ router.put("/:id/like", async (req, res) => {
 });
 //get a post
 
-router.get("/:id", async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    res.status(200).json(post);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+// router.get("/post", async (req, res) => {
+//   try {
+//     const post = await Post.findById(req.params.id);
+//     res.status(200).json(post);
+//   } catch (err) {
+//     res.status(500).json(err);
+//   }
+// });
 
 //get timeline posts
 
@@ -153,8 +153,8 @@ router.get("/:postId/likes/count", async (req, res) => {
     const post = await Post.findById(req.params.postId);
     const likeCount = post.likes.length;
     const users = await User.find({ _id: { $in: post.likes } }, "username email"); // Modify the fields to retrieve as needed
-      res.status(200).json({ count: likeCount, users });
-   
+    res.status(200).json({ count: likeCount, users });
+
   } catch (err) {
     res.status(500).json(err);
   }
@@ -225,11 +225,24 @@ router.get("/timeline/all", verifyToken, async (req, res) => {
 
     // Combine userPosts and friendPosts into a single array
     const allPosts = userPosts.concat(...friendPosts);
-   
-     
-   
+
+
+
     res.json(allPosts);
   } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.get("/", verifyToken, async (req, res) => {
+
+  try {
+    const currentUser = await User.findById(req.user.userId);
+
+     const userPosts = await Post.find({ userId: currentUser._id }).populate("userId", "username profilePicture");
+    res.json(userPosts);
+  } catch (err) {
+
     res.status(500).json(err);
   }
 });

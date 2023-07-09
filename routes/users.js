@@ -185,45 +185,7 @@ router.put("/:id/unfollow", async (req, res) => {
 
   });
   
-  router.post("/send-message",verifyToken, async (req, res) => {
-    try {
-      
-      let userId = req.user.userId;
-      
-      const {receiver,message } = req.body;
-
-      const chat = new Chat({
-        sender: userId,
-        receiver: receiver,
-        message: message
-      });
-      await chat.save();
-      res.status(200).json({data:chat});
-    } catch (err) {
-      res.status(500).json(err);
-    }
-
-  });
   
-  router.get("/get-userchat/:senderid/:reciverid", async (req, res) => {
-    try {
-      const userId = req.params.senderid;
-      const receiverId = req.params.reciverid;
-  
-      const userChat = await Chat.find({
-        $or: [
-          { sender: userId, receiver: receiverId },
-          { sender: receiverId, receiver: userId },
-        ],
-      }).populate("users").populate("receiver", "username email profilePicture");;
-  
-      res.status(200).json({ data: userChat });
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  });
-  
-
 // Create chat
 
 module.exports = router;
