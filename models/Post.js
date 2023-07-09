@@ -1,9 +1,44 @@
 const mongoose = require("mongoose");
 
+const CommentReplySchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  replies: [this], // Nested array of replies
+});
+
+const CommentSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  replies: [CommentReplySchema],
+});
+
 const PostSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     desc: {
@@ -13,10 +48,13 @@ const PostSchema = new mongoose.Schema(
     img: {
       type: String,
     },
-    likes:[{
-      type: mongoose.Types.ObjectId,
-      ref: 'User'
-  }]
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    comments: [CommentSchema],
   },
   { timestamps: true }
 );
