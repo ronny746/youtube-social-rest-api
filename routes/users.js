@@ -2,10 +2,27 @@ const User = require("../models/User");
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
 const Chat = require('../models/Chat');
 const secret_key = "Rana";
+const util = require("util");
+const cloudinary = require("cloudinary").v2;
 
+cloudinary.config({
+  cloud_name: 'dvop5hsdw',
+  api_key: '432668353397378',
+  api_secret: 'JtY42piPH7fDM5ue2eQxtIRKQ50'
+});
 
+const uploadAsync = util.promisify(cloudinary.uploader.upload);
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/'); // Destination folder for storing uploaded files
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname); // Use the original filename
+  }
+});
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization'];
 
@@ -38,29 +55,29 @@ router.get('/alluser', async (req, res) => {
   }
 });
 
-module.exports = router;
+const upload = multer({ storage });
 
 //update user
-router.put("/:id", async (req, res) => {
-  if (req.body.userId === req.params.id || req.body.isAdmin) {
-    if (req.body.password) {
-      try {
-        const salt = await bcrypt.genSalt(10);
-        req.body.password = await bcrypt.hash(req.body.password, salt);
-      } catch (err) {
-        return res.status(500).json(err);
-      }
-    }
-    try {
-      const user = await User.findByIdAndUpdate(req.params.id, {
-        $set: req.body,
-      });
-      res.status(200).json("Account has been updated");
-    } catch (err) {
-      return res.status(500).json(err);
-    }
-  } else {
-    return res.status(403).json("You can update only your account!");
+router.put("/user-update",verifyToken,upload.single('profilePicture'), async (req, res) => {
+  try {
+    const  userId  = req.user.userId;
+    // const { name, profilePicture, email, specification } = req.body;
+    const result = await uploadAsync(req.file.path);
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    // Update user fields
+    user.name = req.body.name;
+    user.profilePicture = result.secure_url;
+    user.email = req.body.email;
+    user.specification = req.body.specification;
+
+    // Save the updated user
+    const updatedUser = await user.save();
+
+    res.status(200).json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update user" });
   }
 });
 
