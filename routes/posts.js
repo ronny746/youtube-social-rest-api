@@ -224,7 +224,7 @@ router.get("/timeline/all", verifyToken, async (req, res) => {
     let allPosts = userPosts.concat(...friendPosts);
     // Sort the allPosts array based on createdAt in descending order
     allPosts.sort((a, b) => b.createdAt - a.createdAt);
-
+    allPosts.reverse();
     res.json(allPosts);
 
   } catch (err) {
