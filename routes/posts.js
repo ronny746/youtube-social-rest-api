@@ -52,9 +52,6 @@ const verifyToken = (req, res, next) => {
 
 router.post("/", upload.single("img"), async (req, res) => {
   try {
-    // const result = await cloudinary.uploader.upload(req.file.buffer, {
-    //   folder: "posts", // Specify the folder in Cloudinary where the uploaded file will be stored
-    // });
     const newPost = new Post({
       userId: req.body.userId,
       desc: req.body.desc,
@@ -114,33 +111,6 @@ router.put("/:id/like", async (req, res) => {
   }
 });
 //get a post
-
-// router.get("/post", async (req, res) => {
-//   try {
-//     const post = await Post.findById(req.params.id);
-//     res.status(200).json(post);
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
-
-//get timeline posts
-
-// router.get("/timeline/all",verifyToken, async (req, res) => {
-//   try {
-//     const currentUser = await User.findById(req.user.userId);
-//     const userPosts = await Post.find({ userId: currentUser._id });
-//     const friendPosts = await Promise.all(
-//       currentUser.followings.map((friendId) => {
-//         return Post.find({ userId: friendId });
-//       })
-//     );
-//     const imageurl = "localhost:"
-//     res.json(userPosts.concat(...friendPosts))
-//   } catch (err) {
-//     res.status(500).json(err);
-//   }
-// });
 
 
 // get post likes with users profile
