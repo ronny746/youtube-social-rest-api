@@ -109,6 +109,8 @@ router.get('/chatted-users/:userId', async (req, res) => {
       };
     }));
 
+    lastChatMessages.reverse();
+
     res.status(200).json(lastChatMessages);
   } catch (error) {
     res.status(500).json({ error: 'Failed to get the chatted users and last chat messages' });
