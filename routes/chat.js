@@ -102,20 +102,29 @@ router.get('/chatted-users/:userId', async (req, res) => {
           { sender: chattedUser._id, receiver: userId }
         ]
       }).sort({ timestamp: -1 }).limit(1);
-      
+
       return {
         chattedUser,
         lastMessage
       };
     }));
 
-    lastChatMessages.reverse();
+    // Sort the chatted users based on the timestamp of the last message in descending order
+    const sortedChattedUsers = lastChatMessages.sort((a, b) => {
+      if (a.lastMessage && b.lastMessage) {
+        return b.lastMessage.timestamp - a.lastMessage.timestamp;
+      }
+      if (!a.lastMessage) return 1;
+      if (!b.lastMessage) return -1;
+      return 0;
+    });
 
-    res.status(200).json(lastChatMessages);
+    res.status(200).json(sortedChattedUsers);
   } catch (error) {
     res.status(500).json({ error: 'Failed to get the chatted users and last chat messages' });
   }
 });
+
 
 router.get('/messages/:user1Id/:user2Id', async (req, res) => {
   try {
