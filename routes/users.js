@@ -203,21 +203,24 @@ router.put("/:id/unfollow", async (req, res) => {
   });
   
   // count followings and get profile
-  router.get("/following",verifyToken, async (req, res) => {
+  router.get("/following", verifyToken, async (req, res) => {
     try {
       const user = await User.findById(req.user.userId);
       if (!user) {
-        res.status(404).json("user not found");
-       }else{
-     
+        return res.status(404).json({ error: "User not found" });
+      }else{
+  
       const followingCount = user.followings.length;
-      const following = await User.find({ _id: { $in: user.followers } }, "username name profilePicture email followers"); // Modify the fields to retrieve as needed
+      const following = await User.find(
+        { _id: { $in: user.followings } },
+        "username name profilePicture email"
+      );
+     
       res.status(200).json({ count: followingCount, following });
-       }
+      }
     } catch (err) {
       res.status(500).json(err);
     }
-
   });
   
   router.get("/not-followers-following", verifyToken, async (req, res) => {
