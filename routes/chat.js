@@ -117,6 +117,26 @@ router.get('/chatted-users/:userId', async (req, res) => {
   }
 });
 
+router.get('/messages/:user1Id/:user2Id', async (req, res) => {
+  try {
+    const { user1Id, user2Id } = req.params;
+
+    // Find the chat messages between the two users
+    const chatMessages = await Chat.find({
+      $or: [
+        { sender: user1Id, receiver: user2Id },
+        { sender: user2Id, receiver: user1Id }
+      ]
+    }).sort({ timestamp: 1 });
+    
+
+    res.status(200).json(chatMessages);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve chat messages' });
+  }
+});
+
+
 
 module.exports = router;
 
