@@ -6,9 +6,9 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'posts'); // Specify the destination folder to store the videos
-    },
+    // destination: function (req, file, cb) {
+    //   cb(null, 'posts'); // Specify the destination folder to store the videos
+    // },
     filename: function (req, file, cb) {
       // Generate a unique filename for the video
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
