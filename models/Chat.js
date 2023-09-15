@@ -6,10 +6,7 @@ const chatSchema = new mongoose.Schema({
     ref: 'User',
     
   },
-  receiver: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
+  
   room: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
